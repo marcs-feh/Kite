@@ -31,7 +31,7 @@ Gap_Buffer :: struct {
 	allocator: mem.Allocator,
 }
 
-// TODO allow option to disable checking
+// TODO: allow option to disable checking
 @private
 buffer_bounds_check :: proc (#any_int low, val, hi: int) -> Buffer_Error {
 	low, val, hi := int(low), int(val), int(hi)
