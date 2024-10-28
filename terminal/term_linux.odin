@@ -31,10 +31,6 @@ _get_dimensions :: proc() -> (w: int, h: int, ok: bool) {
 	return
 }
 
-_get_stdout_handle :: proc() -> TermHandle {
-	return 1
-}
-
 _write_data :: proc(data: []byte) -> bool {
 	_, e := linux.write(stdout, data)
 	return i32(e) >= 0

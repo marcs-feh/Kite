@@ -2,8 +2,6 @@ package term
 
 import "core:strings"
 
-TermHandle :: distinct uintptr
-
 enable_raw_mode :: proc() -> bool {
 	return _enable_raw_mode()
 }
