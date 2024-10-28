@@ -1,0 +1,6 @@
+Kite
+*.exe
+*.o
+*.a
+*.bin
+gap_buffer/gap_buffer
