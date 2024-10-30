@@ -10,60 +10,39 @@ import "core:unicode/utf8"
 import "terminal"
 import "core:container/queue"
 
-Keyboard_Worker_Arg :: struct {
-	input: ^queue.Queue(rune),
-	lock: ^sync.Mutex,
-}
+State :: distinct int
 
-keyboard_worker :: proc(thrd: ^thread.Thread){
-	handle, err := os.open("/dev/stdin")
-	arg := transmute(^Keyboard_Worker_Arg)thrd.data
-	@static input_buf : [16 * 1024]byte
-	@static decode_buf : [len(input_buf) / 4]rune
-
-	for {
-		n, _ := os.read(handle, input_buf[:])
-		bytes_in := input_buf[:n]
-
-		decoded := 0
-		for decoded < len(decode_buf) {
-			left := bytes_in[decoded:]
-			if len(left) < 1 { break }
-			r, n := utf8.decode_rune(left)
-			decoded += n
-		}
-		
-		commit_input: {
-			sync.guard(arg.lock)
-			queue.push_back_elems(arg.input, ..decode_buf[:])
-		}
-	}
+Rule :: struct {
+	input: rune,
+	state: State,
+	next: State,
 }
 
 main :: proc(){
-	@static input_queue : queue.Queue(rune)
-	@static input_lock : sync.Mutex
-	@static input_buf : [1024]rune
-	queue.init_from_slice(&input_queue, input_buf[:])
+	terminal.enable_raw_mode()
+	defer terminal.disable_raw_mode()
 
-	arg := Keyboard_Worker_Arg {
-		input = &input_queue,
-		lock = &input_lock,
-	}
+	@static raw_buf : [4096]byte
 
-	kb_worker := thread.create(keyboard_worker)
-	kb_worker.data = &arg
-	thread.start(kb_worker)
+	input_loop: for {
+		handle, err := os.open("/dev/stdin")
+		n, _ := os.read(handle, raw_buf[:])
 
-	for {
-		read_input: {
-			sync.guard(&input_lock)
-			r, _ := queue.pop_back_safe(&input_queue)
+		decode_buf := raw_buf[:n]
+		decoded := 0
+
+		decode_raw_buffer: for {
+			left := decode_buf[decoded:]
+			if len(left) < 1 { break }
+			r, n := utf8.decode_rune(left);
+
+			if r == 0x03 {
+				break input_loop
+			}
+
 			fmt.print(r)
-			time.sleep(12 * time.Millisecond)
+			decoded += max(1, n)
 		}
 	}
-
-	terminal.enable_raw_mode()
 }
 
