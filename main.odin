@@ -5,18 +5,13 @@ import "core:sync"
 import "core:thread"
 import "core:os"
 import "core:time"
+import "core:container/queue"
+import "core:slice"
+import "core:mem"
+import arr "core:container/small_array"
 import "core:unicode/utf8"
 
 import "terminal"
-import "core:container/queue"
-
-State :: distinct int
-
-Rule :: struct {
-	input: rune,
-	state: State,
-	next: State,
-}
 
 main :: proc(){
 	terminal.enable_raw_mode()
@@ -45,4 +40,5 @@ main :: proc(){
 		}
 	}
 }
+
 
