@@ -42,7 +42,7 @@ buffer_bounds_check :: proc (#any_int low, val, hi: int) -> Buffer_Error {
 }
 
 // Create a gap buffer, the buffer will use the provided allocator for its own operations
-buffer_make :: proc(gap: int, allocator := context.allocator) -> (buf: Gap_Buffer, err: Buffer_Error){
+buffer_make :: proc(gap: int, allocator := context.allocator) -> (buf: Gap_Buffer, err: mem.Allocator_Error){
 	assert(gap >= MIN_GAP, "Gap is too small")
 	data := make([]byte, gap, allocator) or_return
 	defer if err != nil { delete(data, allocator) }

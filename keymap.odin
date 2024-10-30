@@ -1,5 +1,8 @@
 package kite
 
+import "core:mem"
+import arr "core:container/small_array"
+
 Key :: enum byte {
 	a = 'a', b = 'b', c = 'c', d = 'd', e = 'e', f = 'f', g = 'g', h = 'h', i = 'i', j = 'j', k = 'k', l = 'l', m = 'm',
 	n = 'n', o = 'o', p = 'p', q = 'q', r = 'r', s = 's', t = 't', u = 'u', v = 'v', w = 'w', x = 'x', y = 'y', z = 'z',
@@ -35,7 +38,6 @@ keymap_search :: proc(maps: []Key_Map, key: Key, offset: int) -> []Key_Map {
 
 	for km, i in maps {
 		#no_bounds_check if km.sequence.data[offset] == key {
-			fmt.println(km.sequence.data[offset], "=", key)
 			begin = i
 			found = true
 			break
@@ -71,8 +73,8 @@ key_seq_compare :: proc(seq_a, seq_b: ^Key_Sequence) -> int {
 	return mem.compare(a, b)
 }
 
-// Add a new keymaps, key sequence must be unique
-keymap_add :: proc(maps: ^[dynamic]Key_Map, new_map: Key_Map){
+// Add a new keymaps, key sequence must be unique, returns success
+keymap_add :: proc(maps: ^[dynamic]Key_Map, new_map: Key_Map) -> bool {
 	insert_at := 0
 	new_map := new_map
 	for &km, i in maps {
@@ -82,12 +84,13 @@ keymap_add :: proc(maps: ^[dynamic]Key_Map, new_map: Key_Map){
 			break
 		}
 		else if comp == 0 {
-			panic("Cannot have 2 conflicting keymaps")
+			return false
 		}
 		else {
 			continue
 		}
 	}
 
-	inject_at(maps, insert_at, new_map)
+	_, err := inject_at(maps, insert_at, new_map)
+	return (err == nil)
 }
