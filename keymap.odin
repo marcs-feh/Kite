@@ -68,8 +68,8 @@ keymap_make :: proc(action: Key_Map_Action, keys: ..Key) -> Key_Map {
 
 // Compare 2 key sequences, used to keep keymaps sorted and lookups consistent
 key_seq_compare :: proc(seq_a, seq_b: ^Key_Sequence) -> int {
-	a := transmute([]byte) seq_a.data[:seq_a.len]
-	b := transmute([]byte) seq_b.data[:seq_b.len]
+	a := transmute([]byte) arr.slice(seq_a)
+	b := transmute([]byte) arr.slice(seq_b)
 	return mem.compare(a, b)
 }
 
